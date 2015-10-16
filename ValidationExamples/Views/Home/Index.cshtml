@@ -1,0 +1,86 @@
+﻿@model ValidationExamples.Models.Model
+@{
+	ViewBag.Title = "Index";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+
+	Html.EnableClientValidation(true);
+	Html.EnableUnobtrusiveJavaScript(false);
+}
+
+<script type="text/javascript">
+	$().ready(function () {
+		$("#form").validate({
+			debug: true,
+			showErrors:
+				function (errorMap, errorList) {
+				},
+			rules: {
+				textBox: {
+					required: true,
+					minlength: 3,
+					equalsString: true
+				},
+				BlankText: {
+					remote: {
+						url: "@(Url.Action("CheckBlankText", "Home"))",
+						dataType: 'json'
+					}
+				}
+			},
+			messages: {
+				textBox: {
+					required: "This is required",
+					minlength: "Minimum 3 length",
+					equalsString: "Nope"
+				},
+				BlankText: {
+					remote: "Should be blank"
+				}
+			}
+		});
+	});
+	jQuery.validator.addMethod("equalsString", function (val) {
+		return val == "123456";
+	}, "Must be 123456");
+	function OnValueValidation(s, e) {
+		e.isValid = (e.value === "123456");
+	}
+</script>
+
+
+<h2>Index</h2>
+
+@using (Html.BeginForm("Index", "Home", FormMethod.Post, new { id = "form" }))
+{
+	@Html.DevExpress().TextBoxFor(m => m.BlankText, s =>
+{
+	s.Properties.Caption = "Blank";
+	s.Properties.ValidationSettings.Display = Display.Dynamic;
+	s.ShowModelErrors = true;
+	s.Properties.ValidationSettings.ErrorTextPosition = ErrorTextPosition.Right;
+	s.Properties.ValidationSettings.ErrorDisplayMode = ErrorDisplayMode.ImageWithText;
+	//s.Properties.ValidationSettings.ValidateOnLeave = true;
+	//s.Properties.ClientSideEvents.LostFocus = "function(s, e) { s.Validate(); }";
+
+}).GetHtml()
+
+	@Html.DevExpress().TextBox(s =>
+{
+	s.Name = "textBox";
+	s.Properties.Caption = "123456";
+	s.Properties.ValidationSettings.Display = Display.Dynamic;
+	s.Properties.ValidationSettings.ErrorTextPosition = ErrorTextPosition.Right;
+	s.Properties.ValidationSettings.ErrorDisplayMode = ErrorDisplayMode.ImageWithText;
+	//s.Properties.ValidationSettings.ValidateOnLeave = true;
+	s.Properties.ValidationSettings.EnableCustomValidation = true;
+	//s.Properties.ClientSideEvents.Validation = "OnValueValidation";
+	//s.Properties.ClientSideEvents.LostFocus = "function(s, e) { s.Validate(); }";
+}).GetHtml();
+
+	@Html.DevExpress().Button(s =>
+{
+	s.Name = "post";
+	s.UseSubmitBehavior = true;
+}).GetHtml();
+	@Html.DevExpress().ValidationSummary().GetHtml();
+}

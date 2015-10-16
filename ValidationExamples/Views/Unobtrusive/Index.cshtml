@@ -1,0 +1,59 @@
+﻿@model ValidationExamples.Models.Model
+@{
+	ViewBag.Title = "Index";
+	Layout = "~/Views/Shared/_LayoutUn.cshtml";
+	Html.EnableClientValidation(true);
+	Html.EnableUnobtrusiveJavaScript(true);
+}
+
+<script type="text/javascript">
+	function OnValueValidation(s, e) {
+		e.isValid = e.value == "123456";
+	}
+	function OnBlankValidation(s, e) {
+		var value = e.value;
+		var isValid = !value || value == "";
+		e.isValid = isValid;
+		e.errorText = isValid ? "" : "Should be blank";
+	}
+</script>
+
+<h2>Index</h2>
+@using (Html.BeginForm("Index", "Home", FormMethod.Post, new { id = "form" }))
+{
+	@Html.DevExpress().TextBoxFor(m => m.BlankText, s =>
+{
+	s.Properties.Caption = "Blank";
+	s.Properties.ValidationSettings.Display = Display.Dynamic;
+	s.ShowModelErrors = true;
+	s.Properties.ValidationSettings.ErrorTextPosition = ErrorTextPosition.Bottom;
+	s.Properties.ValidationSettings.ErrorDisplayMode = ErrorDisplayMode.ImageWithText;
+	s.Properties.ValidationSettings.ValidateOnLeave = true;
+
+	s.Properties.ClientSideEvents.Validation = "OnBlankValidation";
+	s.Properties.ClientSideEvents.LostFocus = "function(s, e) { s.Validate(); }";
+}).GetHtml()
+
+	@Html.DevExpress().TextBox(s =>
+{
+	s.Name = "textBox";
+	s.Properties.Caption = "123456";
+	s.Properties.ValidationSettings.Display = Display.Dynamic;
+	s.Properties.ValidationSettings.ErrorTextPosition = ErrorTextPosition.Bottom;
+	s.Properties.ValidationSettings.ErrorDisplayMode = ErrorDisplayMode.ImageWithText;
+	s.Properties.ValidationSettings.ValidateOnLeave = true;
+	s.Properties.ValidationSettings.EnableCustomValidation = true;
+	s.Properties.ValidationSettings.RequiredField.IsRequired = true;
+	s.Properties.ValidationSettings.RequiredField.ErrorText = "Cannot be blank";
+	s.Properties.ValidationSettings.ErrorText = "Must be 123456";
+	s.Properties.ClientSideEvents.Validation = "OnValueValidation";
+	s.Properties.ClientSideEvents.LostFocus = "function(s, e) { s.Validate(); }";
+}).GetHtml();
+
+	@Html.DevExpress().Button(s =>
+{
+	s.Name = "post";
+	s.UseSubmitBehavior = true;
+}).GetHtml();
+	@Html.DevExpress().ValidationSummary().GetHtml();
+}
